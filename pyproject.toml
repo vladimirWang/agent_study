@@ -21,6 +21,8 @@ dependencies = [
     "langgraph-checkpoint-postgres>=3.0.5",
     "langgraph-checkpoint-sqlite>=3.0.3",
     "langgraph-cli[inmem]>=0.4.24",
+    "fastapi>=0.136.1",
+    "alibabacloud-oss-v2>=1.2.5",
 ]
 
 [[tool.uv.index]]
