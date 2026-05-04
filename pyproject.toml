@@ -26,6 +26,7 @@ dependencies = [
     "jq>=1.11.0",
     "langchain-chroma>=1.1.0",
     "chromadb>=1.5.8",
+    "streamlit>=1.57.0",
 ]
 
 [[tool.uv.index]]
