@@ -1,10 +1,14 @@
 import time
 import streamlit as st
 from rag import RagService
+import config_data as config
 
 st.title("智能客服")
 
 st.divider()
+
+if 'rag' not in st.session_state:
+    st.session_state['rag'] = RagService()
 
 if 'message' not in st.session_state:
     st.session_state['message'] = [
@@ -24,9 +28,10 @@ if prompt:
     st.session_state['message'].append({"role": "user", "content": prompt})
 
     with st.spinner("思考中..."):
-        time.sleep(1)
-        st.chat_message("assistant").write('fasdf')
-        st.session_state['message'].append({"role": "assistant", "content": 'fasdf'})
+        # time.sleep(1)
+        res = st.session_state['rag'].chain.invoke({"input": prompt}, config.session_config)
+        st.chat_message("assistant").write(res)
+        st.session_state['message'].append({"role": "assistant", "content": res})
 
 # st.session_state.setdefault("session_id", "user001")
 
