@@ -1,10 +1,11 @@
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough, RunnableWithMessageHistory
+from file_history_store import get_history
 from vector_stores import VectorStoreService
 from langchain_community.embeddings import DashScopeEmbeddings
 import config_data as config
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_community.chat_models.tongyi import ChatTongyi
 from dotenv import load_dotenv
 
@@ -21,6 +22,8 @@ class RagService(object):
         )
         self.prompt_template = ChatPromptTemplate.from_messages([
             ("system", "以我提供的已知参考资料为主,简洁和专业地回答问题。参考资料: {context}。"),
+            ("system", "并且我提供用户的对话历史记录如下: {history}。"),
+            MessagesPlaceholder("history"),
             ("user", "请回答用户提问: {input}")
         ])
         self.chat_model = ChatTongyi(model=config.chat_model_name)
@@ -40,14 +43,39 @@ class RagService(object):
 
             return formatted_str
             
+        def format_for_retriever(data: dict) -> str:
+            print("----temp----: ", data)
+            return data['input']
+
+        
+        def format_for_prompt(data: dict) -> str:
+            print("----temp2----: ", data)
+            new_data = {
+                "input": data['input']['input'],
+                "context": data['context'],
+                "history": data['input']['history']
+            }
+            return new_data
         chain = (
             {
                 "input": RunnablePassthrough(), 
-                "context": retriever | format_document
-             } | self.prompt_template | print_prompt | self.chat_model | StrOutputParser()
+                "context": RunnableLambda(format_for_retriever) | retriever | format_document
+             } | RunnableLambda(format_for_prompt) | self.prompt_template | print_prompt | self.chat_model | StrOutputParser()
         )
-        return chain
+
+        conversation_chain = RunnableWithMessageHistory(
+            chain,
+            get_history,
+            input_messages_key="input",
+            history_messages_key="history"
+        )
+        return conversation_chain
 
 if __name__ == "__main__":
-    res = RagService().chain.invoke("我体重180斤，尺码推荐")
+    session_config = {
+        "configurable": {
+            "session_id": "user001"
+        }
+    }
+    res = RagService().chain.invoke({"input": "我的体重是多少"}, session_config)
     print(res)
