@@ -24,7 +24,6 @@ def check_md5(md5_str: str):
 def save_md5(md5_str: str):
     with open(config.md5_path, "a", encoding="utf-8") as f:
         f.write(md5_str+"\n")
-    pass
 
 def get_string_md5(input_str: str, encoding="utf-8"):
     # 将字符串转成字节数组
