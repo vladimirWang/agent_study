@@ -40,3 +40,5 @@ Thumbs.db
 
 *.py[oc]
 wheels/
+
+chromadb/
