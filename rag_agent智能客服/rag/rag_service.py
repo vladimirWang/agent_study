@@ -32,11 +32,15 @@ class RagSummarizeService(object):
 
     def rag_summarize(self, query: str) -> str:
         context_docs = self.retriever_docs(query)
+
         context = ""
         counter = 0
         for doc in context_docs:
+            # print("[rag_summarize] 循环中", f"[{counter}]", doc.page_content, doc.metadata)
             counter+=1
-            context+f"[参考资料{counter}]: 参考资料{doc.page_content} | 参考元数据: {doc.metadata}\n"
+            context+=f"[参考资料{counter}]: 参考资料{doc.page_content} | 参考元数据: {doc.metadata}\n"
+
+        # print("[rag_summarize] 循环后", len(context), context)
         return self.chain.invoke({
             "input": query,
             "context": context
