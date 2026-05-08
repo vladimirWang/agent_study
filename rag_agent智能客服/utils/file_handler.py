@@ -1,9 +1,10 @@
 import hashlib
 import os
 
-from utils.logger_handler import logger
-from langchain_core.documents import Document
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_core.documents import Document
+from utils.logger_handler import logger
+
 
 # 获取文件的md5的十六进制字符串
 def get_file_md5_hex(filepath: str) -> str:
@@ -18,7 +19,7 @@ def get_file_md5_hex(filepath: str) -> str:
     chunk_size = 4096
     try:
         with open(filepath, "rb") as f:
-            while chunk:= f.read(chunk_size):
+            while chunk := f.read(chunk_size):
                 md5_obj.update(chunk)
 
             """
@@ -33,6 +34,7 @@ def get_file_md5_hex(filepath: str) -> str:
         logger.error(f"[md5计算] 文件 {filepath} 计算失败: {str(e)}")
         return
 
+
 # 返回文件夹内的文件列表（允许的文件后缀）
 def listdir_with_allowed_type(path: str, allowed_types: tuple[str]):
     files = []
@@ -44,8 +46,10 @@ def listdir_with_allowed_type(path: str, allowed_types: tuple[str]):
             files.append(os.path.join(path, f))
     return tuple(files)
 
+
 def pdf_loader(filepath: str, password: str = None) -> list[Document]:
     return PyPDFLoader(filepath, password=password).load()
 
+
 def txt_loader(filepath: str) -> list[Document]:
-    return TextLoader(filepath).load()
+    return TextLoader(filepath, encoding="utf-8").load()
